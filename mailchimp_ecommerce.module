@@ -140,6 +140,12 @@ function mailchimp_ecommerce_queue_process($item) {
 
       // Increment customer totals
       $remote_customer = mailchimp_ecommerce_get_customer($customer['id']);
+
+      // Customer doesn't exist in the store.
+      if (!$remote_customer) {
+        return;
+      }
+
       $customer['orders_count'] = $remote_customer->orders_count + 1;
       $customer['total_spent'] = $remote_customer->total_spent + $item['order']['order_total'];
       $mc_ecommerce->{$item['op']}($item['store_id'], $item['order_id'], $customer, $item['order']);
@@ -154,6 +160,12 @@ function mailchimp_ecommerce_queue_process($item) {
 
       // Decrement customer totals.
       $remote_customer = mailchimp_ecommerce_get_customer($customer['id']);
+
+      // Customer doesn't exist in the store.
+      if (!$remote_customer) {
+        return;
+      }
+
       $customer['orders_count'] = $remote_customer->orders_count - 1;
       $customer['total_spent'] = $remote_customer->total_spent - $item['order']['order_total'];
       $mc_ecommerce->updateCustomer($store_id, $remote_customer);
@@ -789,6 +801,12 @@ function mailchimp_ecommerce_add_order($order_id, array $customer, array $order)
 
       // Increment customer totals
       $remote_customer = mailchimp_ecommerce_get_customer($customer['id']);
+
+      // Customer doesn't exist in the store.
+      if (!$remote_customer) {
+        return;
+      }
+
       $customer['orders_count'] = $remote_customer->orders_count + 1;
       $customer['total_spent'] = $remote_customer->total_spent + $order['order_total'];
 
@@ -884,6 +902,12 @@ function mailchimp_ecommerce_delete_order($order_id) {
 
       // Decrement customer totals.
       $remote_customer = mailchimp_ecommerce_get_customer($order->customer->id);
+
+      // Customer doesn't exist in the store.
+      if (!$remote_customer) {
+        return;
+      }
+
       $customer['orders_count'] = $remote_customer->orders_count - 1;
       $customer['total_spent'] = $remote_customer->total_spent - $order['order_total'];
       $mc_ecommerce->updateCustomer($store_id, $customer);
