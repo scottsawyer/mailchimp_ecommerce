@@ -770,6 +770,7 @@ function _mailchimp_ecommerce_commerce_build_order($order_wrapper) {
   $cart_uri = commerce_checkout_order_uri($order);
   $checkout_url = $store_domain ? $store_domain . '/' .  $cart_uri : '';
   $billing_address = [];
+  $processed_at_foreign = $order_wrapper->created->value();
   $lines = [];
 
   if (isset($order_wrapper->mail)) {
@@ -830,7 +831,7 @@ function _mailchimp_ecommerce_commerce_build_order($order_wrapper) {
     'currency_code' => $currency_code,
     'order_total' => $order_total,
     'billing_address' => $billing_address,
-    'processed_at_foreign' => date('c'),
+    'processed_at_foreign' => date('c', $processed_at_foreign),
     'lines' => $lines,
   ];
 

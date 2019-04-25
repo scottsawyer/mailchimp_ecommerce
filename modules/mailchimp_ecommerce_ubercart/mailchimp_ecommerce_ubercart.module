@@ -354,6 +354,7 @@ function mailchimp_ecommerce_ubercart_build_order($order) {
   $currency_code = $order->currency;
   $order_total = '';
   $discount_total = 0;
+  $processed_at_foreign = $order->created;
   $lines = [];
 
   $billing_address = mailchimp_ecommerce_ubercart_parse_billing_address($order);
@@ -407,7 +408,7 @@ function mailchimp_ecommerce_ubercart_build_order($order) {
     'order_total' => $order_total,
     'discount_total' => abs($discount_total),
     'billing_address' => $billing_address,
-    'processed_at_foreign' => date('c'),
+    'processed_at_foreign' => date('c', $processed_at_foreign),
     'lines' => $lines,
   ];
 
