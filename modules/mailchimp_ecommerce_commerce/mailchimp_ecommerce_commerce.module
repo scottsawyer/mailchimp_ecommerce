@@ -374,14 +374,10 @@ function mailchimp_ecommerce_commerce_commerce_line_item_update($line_item) {
 function mailchimp_ecommerce_commerce_commerce_customer_profile_insert($customer_profile) {
   $first_name = '';
   $last_name = '';
-  if ($customer_profile->uid != 0) {
-    $user = user_load($customer_profile->uid);
-    $customer_email = $user->mail;
-  }
-  else {
-    $customer_email = check_plain($_POST['account']['login']['mail']);
-  }
 
+  if (!($customer_email = _mailchimp_ecommmerce_commerce_get_customer_email($customer_profile))) {
+    return;
+  }
   $customer_id = _mailchimp_ecommerce_get_local_customer($customer_email);
   $customer_profile_wrapper = entity_metadata_wrapper('commerce_customer_profile', $customer_profile);
 
@@ -434,14 +430,9 @@ function mailchimp_ecommerce_commerce_commerce_customer_profile_update($customer
     return;
   }
 
-  if ($customer_profile->uid != 0) {
-    $user = user_load($customer_profile->uid);
-    $customer_email = $user->mail;
+  if (!($customer_email = _mailchimp_ecommmerce_commerce_get_customer_email($customer_profile))) {
+    return;
   }
-  else {
-    $customer_email = check_plain($_POST['account']['login']['mail']);
-  }
-
   $customer_id = _mailchimp_ecommerce_get_local_customer($customer_email);
   $customer_profile_wrapper = entity_metadata_wrapper('commerce_customer_profile', $customer_profile);
 
@@ -491,6 +482,30 @@ function mailchimp_ecommerce_commerce_commerce_customer_profile_delete($customer
  */
 function mailchimp_ecommerce_commerce_commerce_cart_order_refresh($order_wrapper) {
 
+}
+
+/**
+ * Helper to pull the customer email address from a profile.
+ */
+function _mailchimp_ecommmerce_commerce_get_customer_email($customer_profile) {
+  $customer_email = '';
+  if ($customer_profile->uid != 0) {
+    $account = user_load($customer_profile->uid);
+    $customer_email = $account->mail;
+  }
+  else {
+    if (!empty($customer_profile->entity_context['entity_id'])) {
+      $order_id = $customer_profile->entity_context['entity_id'];
+      $order = commerce_order_load($order_id);
+      if ($order) {
+        $customer_email = $order->mail;
+      }
+    }
+    elseif (!empty($_POST['account']['login']['mail'])) {
+      $customer_email = check_plain($_POST['account']['login']['mail']);
+    }
+  }
+  return $customer_email;
 }
 
 /**
