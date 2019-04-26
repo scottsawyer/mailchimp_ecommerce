@@ -529,9 +529,9 @@ function mailchimp_ecommerce_ubercart_batch_add_orders($order_ids, &$context) {
     }
 
     // check if the order exists so we can call the correct endpoint.
-    if ($order->order_status == 'pending' || $order->order_status == 'complete') {
-      $order = mailchimp_ecommerce_get_order($order->order_id);
-      if ($order) {
+    if ($order->order_status == 'pending' || $order->order_status == 'completed') {
+      $order_exists = mailchimp_ecommerce_get_order($order->order_id);
+      if ($order_exists) {
         mailchimp_ecommerce_update_order($order->order_id, $mc_order['order_data']);
       }
       else {
