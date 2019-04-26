@@ -74,6 +74,12 @@ function mailchimp_ecommerce_commerce_form_mailchimp_ecommerce_admin_settings_al
         if (isset($properties['settings']['text_processing'])) {
           $description_field_options[$field_name] = $properties['label'];
         }
+
+        // Include image fields from product display types.
+        $field = field_info_field($field_name);
+        if ($field['type'] == 'image' || $field['type'] == 'file') {
+          $image_field_options[$field['field_name']] = t('@label (product display)', array('@label' => $properties['label']));
+        }
       }
     }
   }
@@ -902,21 +908,57 @@ function _mailchimp_ecommerce_commerce_build_image_url($product) {
   $image_style = variable_get('mailchimp_ecommerce_commerce_image_style', '');
   $image_url = '';
 
-  if (!empty($image_field) && !empty($image_style)) {
+  if (!empty($image_field)) {
+    $image = NULL;
+
     $product_wrapper = entity_metadata_wrapper('commerce_product', $product);
     if ($product_wrapper->__isset($image_field) && $product_wrapper->{$image_field}->value()) {
       $image = $product_wrapper->{$image_field}->value();
+    }
+    else {
+      $node_type = variable_get('mailchimp_ecommerce_product_node_type', '');
+      $product_reference_field = variable_get('mailchimp_ecommerce_product_node_field', '');
 
-      // @TODO: Check cardinality of image field, and send all available images.
-      if (is_array($image)) {
-        $image = reset($image);
+      if (!empty($node_type) && !empty($product_reference_field)) {
+        $query = new EntityFieldQuery();
+        $query->entityCondition('entity_type', 'node')
+          ->entityCondition('bundle', $node_type)
+          ->fieldCondition($product_reference_field, 'product_id', $product->product_id, '=')
+          ->range(0, 1);
+        $result = $query->execute();
+
+        if ($result && !empty($result['node'])) {
+          $node = array_pop($result['node']);
+          $node = node_load($node->nid);
+
+          if (isset($node->{$image_field}) && !empty($node->{$image_field})) {
+            $wrapper = entity_metadata_wrapper('node', $node);
+
+            if ($wrapper->__isset($image_field) && $wrapper->{$image_field}->value()) {
+              $image = $wrapper->{$image_field}->value();
+            }
+          }
+        }
       }
+    }
 
+    // @TODO: Check cardinality of image field, and send all available images.
+    if (is_array($image) && !isset($image['fid'])) {
+      $image = reset($image);
+    }
+
+    if (isset($image['fid'])) {
       // Construct a public URL for this image.
       // If the product is being added via a node form, we must load the new file.
       $fid = $image['fid'];
       $file = file_load($fid);
-      $image_url = image_style_url($image_style, $file->uri);
+
+      if (!empty($image_style)) {
+        $image_url = image_style_url($image_style, $file->uri);
+      }
+      else {
+        $image_url = file_create_url($file->uri);
+      }
     }
   }
 
