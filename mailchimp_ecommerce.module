@@ -425,7 +425,7 @@ function mailchimp_ecommerce_add_cart($cart_id, array $customer, array $cart) {
       return;
     }
     if (!mailchimp_ecommerce_validate_customer($customer)) {
-      // A user not existing in the store's Mailchimp list is not an error, so
+      // A user not existing in the store's Mailchimp list/audience is not an error, so
       // don't throw an exception.
       return;
     }
@@ -770,7 +770,7 @@ function mailchimp_ecommerce_add_order($order_id, array $customer, array $order)
       throw new Exception('Cannot add an order without a store ID.');
     }
     if (!mailchimp_ecommerce_validate_customer($customer)) {
-      // A user not existing in the store's Mailchimp list is not an error, so
+      // A user not existing in the store's Mailchimp list/audience is not an error, so
       // don't throw an exception.
       return;
     }
@@ -1244,7 +1244,7 @@ function mailchimp_ecommerce_validate_customer(array $customer) {
  * Get the List ID being used.
  *
  * @return string
- *   The List ID.
+ *   The List/Audience ID.
  */
 function mailchimp_ecommerce_get_list_id() {
   return variable_get('mailchimp_ecommerce_list_id', '');

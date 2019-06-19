@@ -88,7 +88,7 @@ class MailchimpEcommerceCommerceTestCase extends DrupalWebTestCase {
   }
 
   /**
-   * Tests adding a store to Mailchimp with no list.
+   * Tests adding a store to Mailchimp with no list/audience.
    */
   public function testAddStoreNoList() {
     $admin = $this->drupalCreateUser([

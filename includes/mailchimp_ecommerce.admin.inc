@@ -10,7 +10,7 @@
  */
 function mailchimp_ecommerce_admin_settings() {
   $form['mailchimp_ecommerce_notice'] = [
-    '#markup' => t('This page will allow you to create a store. Once created, you cannot change the list associated with the store.'),
+    '#markup' => t('This page will allow you to create a store. Once created, you cannot change the audience associated with the store.'),
   ];
   $form['mailchimp_ecommerce_store_name'] = [
     '#type' => 'textfield',
@@ -39,13 +39,13 @@ function mailchimp_ecommerce_admin_settings() {
   if (!empty(variable_get('mailchimp_ecommerce_list_id', ''))) {
     $existing_store_id = variable_get('mailchimp_ecommerce_list_id');
     $form['mailchimp_ecommerce_list_id_existing'] = [
-      '#markup' => t('Once created, the list cannot be changed for a given store. This store is connected to the list named') . ' ' . $list_options[$existing_store_id],
+      '#markup' => t('Once created, the audience cannot be changed for a given store. This store is connected to the audience named') . ' ' . $list_options[$existing_store_id],
     ];
   }
   else {
     $form['mailchimp_ecommerce_list_id'] = [
       '#type' => 'select',
-      '#title' => t('Store List'),
+      '#title' => t('Store Audience'),
       '#required' => TRUE,
       '#options' => $list_options,
       '#default_value' => variable_get('mailchimp_ecommerce_list_id', ''),

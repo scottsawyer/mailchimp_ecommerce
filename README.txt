@@ -12,7 +12,7 @@ https://mailchimp.com/resources/mailchimp-e-commerce/
 ## Dependencies
 
   * Mailchimp: https://www.drupal.org/project/mailchimp
-  * Mailchimp Lists
+  * Mailchimp Audiences
 
 ## Optional Dependencies
 
@@ -41,8 +41,8 @@ https://mailchimp.com/resources/mailchimp-e-commerce/
   * Connect your Drupal Commerce or Ubercart store to MailChimp at this path:
       /admin/config/services/mailchimp/ecommerce
 
-  * Enter a name for your store and select a MailChimp list.
-    Stores are mapped one-to-one with lists.
+  * Enter a name for your store and select a MailChimp audience.
+    Stores are mapped one-to-one with audiences.
 
 ## For Existing Stores
 
@@ -83,7 +83,7 @@ https://mailchimp.com/resources/mailchimp-e-commerce/
 
     * This module provides integration with Mailchimp, a popular email delivery
       service. The module makes it easy for website users or visitors to control
-      which of your email lists they want to be on (or off), lets you generate
+      which of your email audiences they want to be on (or off), lets you generate
       and send Mailchimp email campaigns from your site, and lets you and your
       users view a history of emails they have been sent from Mailchimp.
       More generally, it aspires to makes your email delivery world efficient
