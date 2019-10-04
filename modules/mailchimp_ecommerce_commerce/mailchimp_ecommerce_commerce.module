@@ -856,6 +856,16 @@ function _mailchimp_ecommerce_commerce_build_order($order_wrapper) {
     'lines' => $lines,
   ];
 
+  // Order parameters that are required for Order Notifications.
+  $order_status = $order_wrapper->status->value();
+  $mc_order_statuses = mailchimp_ecommerce_get_mc_order_statuses($order_status);
+
+  if (!empty($mc_order_statuses['financial_status']) || !empty($mc_order_statuses['fulfillment_status'])) {
+    $order_data['landing_site'] = $_SERVER['HTTP_HOST'];
+    $order_data['financial_status'] = $mc_order_statuses['financial_status'];
+    $order_data['fulfillment_status'] = $mc_order_statuses['fulfillment_status'];
+  }
+
   return ['customer' => $customer, 'order_data' => $order_data];
 }
 

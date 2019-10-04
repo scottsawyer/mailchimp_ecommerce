@@ -1371,3 +1371,61 @@ function mailchimp_ecommerce_get_node_type_name($type_slug) {
 
   return $type_name;
 }
+
+/**
+ * Helper function to get order statuses in correct order.
+ *
+ * Taken from commerce_order_handler_filter_order_status->get_value_options().
+ */
+function mailchimp_ecommerce_get_order_statuses() {
+  $order_statuses = array();
+
+  foreach (commerce_order_state_get_title() as $name => $title) {
+    foreach (commerce_order_statuses(array('state' => $name)) as $order_status) {
+      $order_statuses[$order_status['name']] = $order_status['title'];
+    }
+  }
+
+  return $order_statuses;
+}
+
+/**
+ * Helper function to get Mailchimp order status.
+ *
+ * @url http://developer.mailchimp.com/documentation/mailchimp/guides/getting-started-with-ecommerce/#order-notifications
+ */
+function mailchimp_ecommerce_get_mc_order_statuses($order_status) {
+  $mc_order_statuses = array(
+    'financial_status' => '',
+    'fulfillment_status' => '',
+  );
+
+  $order_statuses = mailchimp_ecommerce_get_order_statuses();
+
+  // Skip if empty.
+  if (empty($order_statuses)) {
+    return $mc_order_statuses;
+  }
+
+  foreach ($order_statuses as $key => $title) {
+    // Skip if not a match.
+    if ($key != $order_status){
+      continue;
+    }
+
+    $order_notification_key_value = variable_get('mailchimp_ecommerce_order_notifications_' . $key, '');
+
+    // Skip if none.
+    if (empty($order_notification_key_value)) {
+      continue;
+    }
+
+    $order_notification_key_value = explode('__', $order_notification_key_value);
+    $order_notification_key = $order_notification_key_value[0];
+    $order_notification_value = $order_notification_key_value[1];
+
+    $mc_order_statuses[$order_notification_key] = $order_notification_value;
+  }
+
+  return $mc_order_statuses;
+}

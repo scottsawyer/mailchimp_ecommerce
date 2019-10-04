@@ -76,6 +76,96 @@ function mailchimp_ecommerce_admin_settings() {
     ];
   }
 
+  $order_statuses = mailchimp_ecommerce_get_order_statuses();
+
+  if (!empty($order_statuses)) {
+    $notices = array(
+      'cancellation_confirmation' => array(
+        'title' => 'Cancellation Confirmation',
+        'description' => 'Notifies customers that their order has been cancelled.',
+        'values' => array(
+          'financial_status' => array('cancelled'),
+          'fulfillment_status' => array(),
+        ),
+      ),
+      'order_invoice' => array(
+        'title' => 'Order Invoice',
+        'description' => 'Notifies customers that their payment has been processed.<br>This is only recommended if customers aren’t charged at time of order. If customers are charged at time of order, use the Order Confirmation instead.',
+        'values' => array(
+          'financial_status' => array('paid'),
+          'fulfillment_status' => array(),
+        ),
+      ),
+      'order_confirmation' => array(
+        'title' => 'Order Confirmation',
+        'description' => 'Sends a receipt to customers when they buy something from your store.<br>This is only recommended if customers are charged at time of order. If customers aren’t charged at time of order, use the Order Invoice instead.',
+        'values' => array(
+          'financial_status' => array('pending'),
+          'fulfillment_status' => array(),
+        ),
+      ),
+      'shipping_confirmation' => array(
+        'title' => 'Shipping Confirmation',
+        'description' => 'Notifies customers that their order is on the way.',
+        'values' => array(
+          'financial_status' => array(),
+          'fulfillment_status' => array('shipped'),
+        ),
+      ),
+      'refund_confirmation' => array(
+        'title' => 'Refund Confirmation',
+        'description' => 'Notifies customers that their refund has been processed.',
+        'values' => array(
+          'financial_status' => array('refunded'),
+          'fulfillment_status' => array(),
+        ),
+      ),
+    );
+
+    $notice_descriptions = '<ul>';
+    $notice_options = array();
+
+    foreach ($notices as $notice_data) {
+      $title = $notice_data['title'];
+      $notice_descriptions .= '<li><b>' . $title . '</b>: ' . $notice_data['description'] . '</li>';
+      $notice_options[$title] = array();
+
+      foreach ($notice_data['values'] as $key => $values) {
+        foreach ($values as $status_value) {
+          // Skip if none.
+          if (empty($status_value)) {
+            continue;
+          }
+
+          $notice_options[$title][$key . '__' . $status_value] = $title . ': ' . $status_value;
+        }
+      }
+    }
+
+    $notice_descriptions .= '</ul>';
+
+    $form['order_notifications'] = [
+      '#type' => 'fieldset',
+      '#title' => t('Order Notifications'),
+      '#description' => t('Select the <a href="@url" target="_blank">Order Notification</a> per Order Status. !notice_descriptions', array(
+        '@url' => 'http://developer.mailchimp.com/documentation/mailchimp/guides/getting-started-with-ecommerce/#order-notifications',
+        '!notice_descriptions' => $notice_descriptions,
+      )),
+      '#collapsible' => FALSE,
+      '#weight' => 99,
+    ];
+
+    foreach ($order_statuses as $key => $title) {
+      $form['order_notifications']['mailchimp_ecommerce_order_notifications_' . $key] = [
+        '#type' => 'select',
+        '#title' => t($title),
+        '#empty_option' => t('- None -'),
+        '#options' => $notice_options,
+        '#default_value' => variable_get('mailchimp_ecommerce_order_notifications_' . $key, ''),
+      ];
+    }
+  }
+
   // Identify the eCommerce platform to Mailchimp. This value is set in this
   // module's submodules for both Drupal Commerce and Ubercart.
   $form['platform'] = [
