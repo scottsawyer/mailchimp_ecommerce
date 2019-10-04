@@ -89,7 +89,7 @@ class BatchSyncOrders {
 
       $context['sandbox']['progress']++;
 
-      $context['message'] = t('Sent @count of @total products to Mailchimp', [
+      $context['message'] = t('Sent @count of @total orders to Mailchimp', [
         '@count' => $context['sandbox']['progress'],
         '@total' => $context['sandbox']['total'],
       ]);
