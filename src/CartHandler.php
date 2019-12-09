@@ -3,6 +3,7 @@
 namespace Drupal\mailchimp_ecommerce;
 
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Mailchimp\MailchimpEcommerce;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -33,17 +34,26 @@ class CartHandler implements CartHandlerInterface, ContainerInjectionInterface {
    */
   protected $messenger;
 
-  public function __construct(MailchimpEcommerce $mc_ecommerce, MailchimpEcommerceHelper $helper, MessengerInterface $messenger) {
+  /**
+   * The logger factory.
+   *
+   * @var \Drupal\Core\Logger\LoggerChannelFactoryInterface
+   */
+  protected $logger;
+
+  public function __construct(MailchimpEcommerce $mc_ecommerce, MailchimpEcommerceHelper $helper, MessengerInterface $messenger, LoggerChannelFactoryInterface $logger_factory) {
     $this->mcEcommerce = $mc_ecommerce;
     $this->helper = $helper;
     $this->messenger = $messenger;
+    $this->logger = $logger_factory->get('mailchimp_ecommerce');
   }
 
   public static function create(ContainerInterface $container) {
     return new static(
       \mailchimp_get_api_object('MailchimpEcommerce'),
       $container->get('mailchimp_ecommerce.helper'),
-      $container->get('messenger')
+      $container->get('messenger'),
+      $container->get('logger.factory')
     );
   }
 
@@ -80,7 +90,7 @@ class CartHandler implements CartHandlerInterface, ContainerInjectionInterface {
       }
     }
     catch (\Exception $e) {
-      //mailchimp_ecommerce_log_error_message('Unable to get the requested cart: ' . $e->getMessage());
+      $this->logger->error('Unable to get the requested cart: %message', ['%message' => $e->getMessage()]);
       $this->messenger->addError($e->getMessage());
     }
 
@@ -126,7 +136,7 @@ class CartHandler implements CartHandlerInterface, ContainerInjectionInterface {
       }
     }
     catch (\Exception $e) {
-      //mailchimp_ecommerce_log_error_message('Unable to add a cart: ' . $e->getMessage());
+      $this->logger->error('Unable to add a cart: %message', ['%message' => $e->getMessage()]);
       $this->messenger->addError($e->getMessage());
     }
   }
@@ -147,7 +157,7 @@ class CartHandler implements CartHandlerInterface, ContainerInjectionInterface {
         // Cart doesn't exist; no need to log an error.
       }
       else {
-        //mailchimp_ecommerce_log_error_message('Unable to delete a cart: ' . $e->getMessage());
+        $this->logger->error('Unable to delete a cart: %message', ['%message' => $e->getMessage()]);
         $this->messenger->addError($e->getMessage());
       }
     }
@@ -166,7 +176,7 @@ class CartHandler implements CartHandlerInterface, ContainerInjectionInterface {
       $this->mcEcommerce->addCartLine($store_id, $cart_id, $line_id, $product);
     }
     catch (\Exception $e) {
-      //mailchimp_ecommerce_log_error_message('Unable to add a cart line: ' . $e->getMessage());
+      $this->logger->error('Unable to add a cart line: %message', ['%message' => $e->getMessage()]);
       $this->messenger->addError($e->getMessage());
     }
   }
@@ -188,7 +198,7 @@ class CartHandler implements CartHandlerInterface, ContainerInjectionInterface {
         $this->mcEcommerce->addCartLine($store_id, $cart_id, $line_id, $product);
       }
       else {
-        //mailchimp_ecommerce_log_error_message('Unable to update a cart line: ' . $e->getMessage());
+        $this->logger->error('Unable to update a cart line: %message', ['%message' => $e->getMessage()]);
         $this->messenger->addError($e->getMessage());
       }
     }
@@ -207,7 +217,7 @@ class CartHandler implements CartHandlerInterface, ContainerInjectionInterface {
       $this->mcEcommerce->deleteCartLine($store_id, $cart_id, $line_id);
     }
     catch (\Exception $e) {
-      //mailchimp_ecommerce_log_error_message('Unable to delete a cart line: ' . $e->getMessage());
+      $this->logger->error('Unable to delete a cart line: %message', ['%message' => $e->getMessage()]);
       $this->messenger->addError($e->getMessage());
     }
   }

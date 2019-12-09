@@ -2,10 +2,26 @@
 
 namespace Drupal\mailchimp_ecommerce;
 
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+
 /**
  * Store handler.
  */
 class StoreHandler implements StoreHandlerInterface {
+
+  /**
+   * Drupal\Core\Logger\LoggerChannelFactoryInterface definition.
+   *
+   * @var \Drupal\Core\Logger\LoggerChannelFactoryInterface
+   */
+  protected $logger;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(LoggerChannelFactoryInterface $logger_factory) {
+    $this->logger = $logger_factory->get('mailchimp_ecommerce');
+  }
 
   /**
    * @inheritdoc
@@ -22,7 +38,7 @@ class StoreHandler implements StoreHandlerInterface {
         // Store doesn't exist; no need to log an error.
       }
       else {
-        mailchimp_ecommerce_log_error_message('Unable to get store: ' . $e->getMessage());
+        $this->logger->error('Unable to get store: %message', ['%message' => $e->getMessage()]);
         drupal_set_message($e->getMessage(), 'error');
       }
     }
@@ -47,7 +63,7 @@ class StoreHandler implements StoreHandlerInterface {
       \Drupal::moduleHandler()->invokeAll('mailchimp_ecommerce_add_store', [$mc_store]);
     }
     catch (\Exception $e) {
-      mailchimp_ecommerce_log_error_message('Unable to add a new store: ' . $e->getMessage());
+      $this->logger->error('Unable to add a new store: %message', ['%message' => $e->getMessage()]);
       drupal_set_message($e->getMessage(), 'error');
     }
   }
@@ -67,7 +83,7 @@ class StoreHandler implements StoreHandlerInterface {
       $mc_ecommerce->updateStore($store_id, $name, $currency_code, $parameters);
     }
     catch (\Exception $e) {
-      mailchimp_ecommerce_log_error_message('Unable to update a store: ' . $e->getMessage());
+      $this->logger->error('Unable to update a store: %message', ['%message' => $e->getMessage()]);
       drupal_set_message($e->getMessage(), 'error');
     }
   }

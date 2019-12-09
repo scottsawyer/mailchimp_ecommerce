@@ -2,6 +2,7 @@
 
 namespace Drupal\mailchimp_ecommerce;
 
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\node\Entity\Node;
 use Drupal\commerce_product\Entity\Product;
 use Drupal\commerce_product\Entity\ProductVariation;
@@ -10,6 +11,20 @@ use Drupal\commerce_product\Entity\ProductVariation;
  * Product handler.
  */
 class ProductHandler implements ProductHandlerInterface {
+
+  /**
+   * Drupal\Core\Logger\LoggerChannelFactoryInterface definition.
+   *
+   * @var \Drupal\Core\Logger\LoggerChannelFactoryInterface
+   */
+  protected $logger;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(LoggerChannelFactoryInterface $logger_factory) {
+    $this->logger = $logger_factory->get('mailchimp_ecommerce');
+  }
 
   /**
    * @inheritdoc
@@ -34,7 +49,7 @@ class ProductHandler implements ProductHandlerInterface {
     catch (\Exception $e) {
 
       //TODO: If add fails with product exists error code, run an update here.
-      mailchimp_ecommerce_log_error_message('Unable to add product: ' . $e->getMessage());
+      $this->logger->error($e->getMessage());
       drupal_set_message($e->getMessage(), 'error');
     }
   }
@@ -75,7 +90,7 @@ class ProductHandler implements ProductHandlerInterface {
       }
       else {
         // An actual error occurred; pass on the exception.
-        mailchimp_ecommerce_log_error_message('Unable to update product: ' . $e->getMessage());
+        $this->logger->error('Unable to update product: %message', ['%message' => $e->getMessage()]);
         drupal_set_message($e->getMessage(), 'error');
       }
     }
@@ -96,7 +111,7 @@ class ProductHandler implements ProductHandlerInterface {
       $mc_ecommerce->deleteProduct($store_id, $product_id);
     }
     catch (\Exception $e) {
-      mailchimp_ecommerce_log_error_message('Unable to delete product: ' . $e->getMessage());
+      $this->logger->error('Unable to delete product: %message', ['%message' => $e->getMessage()]);
       drupal_set_message($e->getMessage(), 'error');
     }
   }
@@ -124,7 +139,7 @@ class ProductHandler implements ProductHandlerInterface {
       ]);
     }
     catch (\Exception $e) {
-      mailchimp_ecommerce_log_error_message('Unable to add product variant: ' . $e->getMessage());
+      $this->logger->error('Unable to add product variant: %message', ['%message' => $e->getMessage()]);
       drupal_set_message($e->getMessage(), 'error');
     }
   }
@@ -152,7 +167,7 @@ class ProductHandler implements ProductHandlerInterface {
       }
     }
     catch (\Exception $e) {
-      mailchimp_ecommerce_log_error_message('Unable to get product variant: ' . $e->getMessage());
+      $this->logger->error('Unable to get product variant: %message', ['%message' => $e->getMessage()]);
       drupal_set_message($e->getMessage(), 'error');
     }
 
@@ -229,7 +244,7 @@ class ProductHandler implements ProductHandlerInterface {
       }
     }
     catch (\Exception $e) {
-      mailchimp_ecommerce_log_error_message('Unable to delete product variant: ' . $e->getMessage());
+      $this->logger->error('Unable to delete product variant: %message', ['%message' => $e->getMessage()]);
       drupal_set_message($e->getMessage(), 'error');
     }
   }

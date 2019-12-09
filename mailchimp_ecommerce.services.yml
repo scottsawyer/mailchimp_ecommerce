@@ -6,16 +6,19 @@ services:
 
   mailchimp_ecommerce.customer_handler:
     class: '\Drupal\mailchimp_ecommerce\CustomerHandler'
-    arguments: ['@mailchimp_ecommerce.database']
+    arguments: ['@mailchimp_ecommerce.database', '@logger.factory']
 
   mailchimp_ecommerce.order_handler:
     class: '\Drupal\mailchimp_ecommerce\OrderHandler'
+    arguments: ['@logger.factory']
 
   mailchimp_ecommerce.product_handler:
     class: '\Drupal\mailchimp_ecommerce\ProductHandler'
+    arguments: ['@logger.factory']
 
   mailchimp_ecommerce.store_handler:
     class: '\Drupal\mailchimp_ecommerce\StoreHandler'
+    arguments: ['@logger.factory']
 
   mailchimp_ecommerce.database:
     class: Drupal\Core\Database\Connection
@@ -25,4 +28,8 @@ services:
   mailchimp_ecommerce.helper:
     class: '\Drupal\mailchimp_ecommerce\MailchimpEcommerceHelper'
     factory: ['@class_resolver', 'getInstanceFromDefinition']
-    arguments: ['\Drupal\mailchimp_ecommerce\MailchimpEcommerceHelper']
+    arguments: ['\Drupal\mailchimp_ecommerce\MailchimpEcommerceHelper', '@logger.factory']
+
+  logger.channel.mailchimp_ecommerce:
+    parent: logger.channel_base
+    arguments: ['mailchimp_ecommerce']

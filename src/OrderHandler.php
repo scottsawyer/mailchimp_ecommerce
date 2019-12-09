@@ -2,6 +2,7 @@
 
 namespace Drupal\mailchimp_ecommerce;
 
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\commerce_order\Entity\Order;
 use Drupal\commerce_order\Entity\OrderItem;
 
@@ -9,6 +10,20 @@ use Drupal\commerce_order\Entity\OrderItem;
  * Order handler.
  */
 class OrderHandler implements OrderHandlerInterface {
+
+  /**
+   * Drupal\Core\Logger\LoggerChannelFactoryInterface definition.
+   *
+   * @var \Drupal\Core\Logger\LoggerChannelFactoryInterface
+   */
+  protected $logger;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(LoggerChannelFactoryInterface $logger_factory) {
+    $this->logger = $logger_factory->get('mailchimp_ecommerce');
+  }
 
   /**
    * @inheritdoc
@@ -26,7 +41,7 @@ class OrderHandler implements OrderHandlerInterface {
       return $order;
     }
     catch (\Exception $e) {
-      mailchimp_ecommerce_log_error_message('Unable to get order: ' . $e->getMessage());
+      $this->logger->error('Unable to get order: %message', ['%message' => $e->getMessage()]);
       drupal_set_message($e->getMessage(), 'error');
     }
 
@@ -60,7 +75,7 @@ class OrderHandler implements OrderHandlerInterface {
       $mc_ecommerce->addOrder($store_id, $order_id, $customer, $order);
     }
     catch (\Exception $e) {
-      mailchimp_ecommerce_log_error_message('Unable to add an order: ' . $e->getMessage());
+      $this->logger->error('Unable to add an order: %message', ['%message' => $e->getMessage()]);
       drupal_set_message($e->getMessage(), 'error');
     }
   }
@@ -80,7 +95,7 @@ class OrderHandler implements OrderHandlerInterface {
       $mc_ecommerce->updateOrder($store_id, $order_id, $order);
     }
     catch (\Exception $e) {
-      mailchimp_ecommerce_log_error_message('Unable to update an order: ' . $e->getMessage());
+      $this->logger->error('Unable to update an order: %message', ['%message' => $e->getMessage()]);
       drupal_set_message($e->getMessage(), 'error');
     }
   }

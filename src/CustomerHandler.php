@@ -3,6 +3,7 @@
 namespace Drupal\mailchimp_ecommerce;
 
 use Drupal\Core\Database\Connection;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 
 /**
  * Customer handler.
@@ -17,13 +18,21 @@ class CustomerHandler implements CustomerHandlerInterface {
   private $database;
 
   /**
+   * The logger factory.
+   *
+   * @var \Drupal\Core\Logger\LoggerChannelFactoryInterface
+   */
+  protected $logger;
+
+  /**
    * CustomerHandler constructor.
    *
    * @param \Drupal\Core\Database\Connection $database
    *   The Order Handler.
    */
-  public function __construct(Connection $database) {
+  public function __construct(Connection $database, LoggerChannelFactoryInterface $logger_factory) {
     $this->database = $database;
+    $this->logger = $logger_factory;
   }
 
   /**
@@ -46,7 +55,7 @@ class CustomerHandler implements CustomerHandlerInterface {
         // Customer doesn't exist in the store; no need to log an error.
       }
       else {
-        mailchimp_ecommerce_log_error_message('Unable to delete a customer: ' . $e->getMessage());
+        $this->logger->error('Unable to delete a customer: %message', ['%message' => $e->getMessage()]);
         drupal_set_message($e->getMessage(), 'error');
       }
     }
@@ -85,7 +94,7 @@ class CustomerHandler implements CustomerHandlerInterface {
       }
     }
     catch (\Exception $e) {
-      mailchimp_ecommerce_log_error_message('Unable to add a customer: ' . $e->getMessage());
+      $this->logger->error('Unable to add a customer: %message', ['%message' => $e->getMessage()]);
       drupal_set_message($e->getMessage(), 'error');
     }
   }
@@ -105,7 +114,7 @@ class CustomerHandler implements CustomerHandlerInterface {
       $mc_ecommerce->deleteCustomer($store_id, $customer_id);
     }
     catch (\Exception $e) {
-      mailchimp_ecommerce_log_error_message('Unable to delete a customer: ' . $e->getMessage());
+      $this->logger->error('Unable to delete a customer: %message', ['%message' => $e->getMessage()]);
       drupal_set_message($e->getMessage(), 'error');
     }
   }

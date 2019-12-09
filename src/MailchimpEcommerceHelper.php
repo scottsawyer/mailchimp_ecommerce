@@ -4,6 +4,7 @@ namespace Drupal\mailchimp_ecommerce;
 
 use Drupal\Core\Config\ImmutableConfig;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Mailchimp\MailchimpCampaigns;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -45,6 +46,13 @@ class MailchimpEcommerceHelper implements ContainerInjectionInterface {
   protected $config;
 
   /**
+   * The logger channel factory.
+   *
+   * @var \Drupal\Logger\LoggerChannelFactoryInterface
+   */
+  protected $logger;
+
+  /**
    * MailchimpEcommerceHelper constructor.
    *
    * @param \Mailchimp\MailchimpCampaigns $mc_campaigns
@@ -56,11 +64,12 @@ class MailchimpEcommerceHelper implements ContainerInjectionInterface {
    * @param \Drupal\Core\Config\ImmutableConfig $config
    *   The mailchimp_ecommerce config.
    */
-  public function __construct(MailchimpCampaigns $mc_campaigns, MessengerInterface $messenger, Request $request, ImmutableConfig $config) {
+  public function __construct(MailchimpCampaigns $mc_campaigns, MessengerInterface $messenger, Request $request, ImmutableConfig $config, LoggerChannelFactoryInterface $logger_factory) {
     $this->mcCampaigns = $mc_campaigns;
     $this->messenger = $messenger;
     $this->request = $request;
     $this->config = $config;
+    $this->logger = $logger_factory->get('mailchimp_ecommerce');
   }
 
   /**
@@ -71,7 +80,8 @@ class MailchimpEcommerceHelper implements ContainerInjectionInterface {
       \mailchimp_get_api_object('MailchimpCampaigns'),
       $container->get('messenger'),
       $container->get('request_stack')->getCurrentRequest(),
-      $container->get('config.factory')->get('mailchimp_ecommerce.settings')
+      $container->get('config.factory')->get('mailchimp_ecommerce.settings'),
+      $container->get('logger.factory')
     );
   }
 
@@ -110,7 +120,7 @@ class MailchimpEcommerceHelper implements ContainerInjectionInterface {
         // Campaign doesn't exist; no need to log an error.
       }
       else {
-        /* mailchimp_ecommerce_log_error_message('Unable to get campaign: ' . $e->getMessage()); */
+        $this->logger->error('Unable to get campaign: %message', ['%message' => $e->getMessage()]);
         $this->messenger->addError($e->getMessage());
       }
     }

@@ -90,19 +90,3 @@ function mailchimp_ecommerce_get_list_id() {
 function mailchimp_ecommerce_get_currency_codes() {
   return \Drupal::service('mailchimp_ecommerce.helper')->getCurrencyCodes();
 }
-
-/**
- * Logs an error message using watchdog, if enabled.
- *
- * @todo This function cannot run, the function "watchdog" is never defined.
- *
- * @param string $message
- *   The error message to log.
- */
-function mailchimp_ecommerce_log_error_message($message) {
-  if (function_exists('watchdog')) {
-    \Drupal::logger('mailchimp_ecommerce')->error('%message', array(
-      '%message' => $message,
-    ));
-  }
-}
